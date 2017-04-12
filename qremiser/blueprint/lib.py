@@ -26,7 +26,9 @@ def produce_checksums(f, hashers, buf=8192):
 
 def _detect_mime(file_path, original_name):
     magic_num = from_file(file_path, mime=True)
-    guess = guess_type(original_name)[0]
+    guess = None
+    if original_name is not None:
+        guess = guess_type(original_name)[0]
     return magic_num, guess
 
 
@@ -38,9 +40,53 @@ def make_record(file_path, objectIdentifier=None, originalName=None):
         )
 
     objectCharacteristics = _build_objectCharacteristics(file_path, originalName)
-    obj = pyqremis.Object(objectIdentifier, objectCharacteristics, objectCategory="file",
-                          originalName=originalName)
-    qremis = pyqremis.Qremis(obj)
+    obj = pyqremis.Object(objectIdentifier, objectCharacteristics, objectCategory="file")
+    if originalName is not None:
+        obj.set_originalName(originalName)
+    eventIdentifier = pyqremis.EventIdentifier(
+        eventIdentifierType="uuid",
+        eventIdentifierValue=uuid4().hex
+    )
+    event = pyqremis.Event(
+        eventIdentifier=eventIdentifier,
+        eventType="description",
+        eventDateTime=datetime.now().isoformat(),
+        eventOutcomeInformation=pyqremis.EventOutcomeInformation(
+            eventOutcome="success"
+        ),
+        eventDetailInformation=pyqremis.EventDetailInformation(
+            eventDetail="Initial qremis record created"
+        )
+    )
+
+    relationship = pyqremis.Relationship(
+        pyqremis.RelationshipIdentifier(
+            relationshipIdentifierType="uuid",
+            relationshipIdentifierValue=uuid4().hex
+        ),
+        relationshipType="link",
+        relationshipSubType="simple"
+    )
+
+    relationship.add_linkingObjectIdentifier(
+        pyqremis.LinkingObjectIdentifier(
+            linkingObjectIdentifierType=obj.get_objectIdentifier()[0].get_objectIdentifierType(),
+            linkingObjectIdentifierValue=obj.get_objectIdentifier()[0].get_objectIdentifierValue()
+        )
+    )
+
+    relationship.add_linkingEventIdentifier(
+        pyqremis.LinkingEventIdentifier(
+            linkingEventIdentifierType=event.get_eventIdentifier()[0].get_eventIdentifierType(),
+            linkingEventIdentifierValue=event.get_eventIdentifier()[0].get_eventIdentifierValue()
+        )
+    )
+
+    relationship.add_relationshipNote(
+        "Link between object and original description event"
+    )
+
+    qremis = pyqremis.Qremis(obj, event, relationship)
     return qremis
 
 
@@ -59,7 +105,8 @@ def _build_fixitys(file_path):
     hashers = [md5(), sha256(), crc32(), adler32()]
     with open(file_path, 'rb') as f:
         checksums = produce_checksums(f, hashers)
-    return [pyqremis.Fixity(messageDigestAlgorithm=x, messageDigest=checksums[x]) for x in checksums]
+    return [pyqremis.Fixity(messageDigestAlgorithm=x, messageDigest=checksums[x]) for x in checksums
+            if checksums[x] != 'None']
 
 
 def _build_formats(file_path, originalName):
