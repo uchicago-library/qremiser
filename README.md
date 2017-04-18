@@ -1,7 +1,10 @@
 Under development
 
-An RPC-esque endpoint for generating qremis records.
+A library for generating bare-bones qremis records, and a handy RPC-esque web endpoint to invoke it. 
 
-Cousin of the [PREMISer](https://github.com/uchicago-library/PREMISer).
+Information about the qremis specification is available [here](https://github.com/bnbalsamo/qremis)
 
-Will probably shortly be closely tied to the [qremis api](https://github.com/bnbalsamo/qremis_api)
+The supporting python library for qremis is available [here](https://github.com/bnbalsamo/pyqremis)
+
+
+(Now distant) cousin of the [PREMISer](https://github.com/uchicago-library/PREMISer).
