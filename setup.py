@@ -17,9 +17,9 @@ setup(
     # https://github.com/ahupp/python-magic/commit/ee09e35780c8d898bfb8913e847eff5eac38ffd2
     # which hasn't made its way into pip yet.
     dependency_links = [
-        'https://github.com/bnbalsamo/pyqremis' +
+        'https://github.com/uchicago-library/pyqremis' +
         '/tarball/master#egg=pyqremis',
-        'https://github.com/bnbalsamo/nothashes' +
+        'https://github.com/uchicago-library/nothashes' +
         '/tarball/master#egg=nothashes',
         'https://github.com/ahupp/python-magic' +
         '/tarball/master#egg=python-magic'
